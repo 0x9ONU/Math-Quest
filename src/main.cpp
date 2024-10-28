@@ -96,8 +96,6 @@ short quizMode = 0;
 
 short currentScore = 0;
 
-<<<<<<< Updated upstream
-=======
 bool lastMenu = 0;
 
 //Cursor Variable
@@ -105,7 +103,6 @@ short x = 0;
 short y = 0;
 
 
->>>>>>> Stashed changes
 //Funciton Defintiions
 void A_CHANGE_1(); 
 void A_CHANGE_2();
@@ -114,24 +111,15 @@ void Push_2();
 void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2, bool push, bool back);
 uint16_t randomColor();
 void squareTransition(uint16_t color);
-<<<<<<< Updated upstream
-=======
 void chooseGradeLevel(int push, int back);
 
 //Reset Numbers
->>>>>>> Stashed changes
 void resetAdd();
 void resetSub();
 void resetMult();
 void resetDiv();
 void resetQuiz();
 
-<<<<<<< Updated upstream
-void setup() {
-    //Setup Screen
-    gfx->begin();
-    gfx->fillScreen(WHITE);
-=======
 //Different Functions
 void addMode(int push, int back);
 void subtractMode(int push, int back);
@@ -145,7 +133,6 @@ digitalWrite(TFT_LED, HIGH);
 gfx->begin();
 gfx->fillScreen(WHITE);
 Serial.begin(9600);
->>>>>>> Stashed changes
 
 #ifdef TFT_BL
     pinMode(TFT_BL, OUTPUT);
@@ -153,46 +140,16 @@ Serial.begin(9600);
 #endif
   //Finalize screen setup and do opening menu screen
     gfx->setTextSize(5, 5);
-    gfx->setCursor(gfx->width()/2-20, gfx->height()/2);
+    gfx->setCursor(20, gfx->height()/2-5);
     char Title[10] = {'M', 'a', 't', 'h', 0x20, 'Q', 'u', 'e', 's', 't'};
     for (int i = 0; i < 10; i++) {
       gfx->setTextColor(randomColor());
       gfx->print(Title[i]);
-<<<<<<< Updated upstream
-      delay(10);
-=======
       delay(100);
->>>>>>> Stashed changes
     }
 
     delay(1000);
 
-<<<<<<< Updated upstream
-    gfx->fillRect(gfx->width()/2 -20, gfx->height()/2 - 6, 40, 20, WHITE);
-    gfx->setCursor(gfx->width()/2-20, gfx->height()/2);
-    gfx->print("Math Quest");
-    gfx->setCursor(gfx->width()/2-50, gfx->height()/2+6);
-    gfx->setTextSize(3, 3);
-    gfx->print("Press Enter to Continue");
-
-    //Setup Encoder 1
-    SIG_B_1 = digitalRead (E1_OUT_B); // Current state of B
-    SIG_A_1 = SIG_B_1 > 0 ? 0 : 1; // Let them be different
-    // Attach iterrupt for state change, not rising or falling edges
-    attachInterrupt (digitalPinToInterrupt (E1_OUT_A), A_CHANGE_1, CHANGE);
-    
-    //Setup Encoder 2
-    SIG_B_2 = digitalRead (E2_OUT_B); // Current state of B
-    SIG_A_2 = SIG_B_1 > 0 ? 0 : 1; // Let them be different
-    // Attach iterrupt for state change, not rising or falling edges
-    attachInterrupt (digitalPinToInterrupt (E2_OUT_A), A_CHANGE_2, CHANGE);
-
-    // Attach Interrupt to Push-Part of Board
-    attachInterrupt (digitalPinToInterrupt(E1_PUSH), Push_1, CHANGE);
-    attachInterrupt (digitalPinToInterrupt(E2_PUSH), Push_2, CHANGE);
-
-    updateScreen(0, 0, 0, 0, 0, 0);
-=======
 gfx->fillScreen(WHITE);
 gfx->setCursor(20, gfx->height()/2-5);
 gfx->print("Math Quest");
@@ -213,96 +170,10 @@ attachInterrupt(digitalPinToInterrupt(E1_OUT_A), read_encoder, CHANGE);
 attachInterrupt(digitalPinToInterrupt(E1_OUT_B), read_encoder, CHANGE);
 attachInterrupt(digitalPinToInterrupt(E2_OUT_A), read_encoder_2, CHANGE);
 attachInterrupt(digitalPinToInterrupt(E2_OUT_B), read_encoder_2, CHANGE);
->>>>>>> Stashed changes
 }
 
 void loop()
 {
-<<<<<<< Updated upstream
-  updateScreen(0, 0, 0, 0, 0, 0);
-}
-
-void A_CHANGE_1() { // Interrupt Service Routine (ISR)
-  detachInterrupt (0); // Important
-  SIG_A_1 = digitalRead (E1_OUT_A); // Read state of A
-  SIG_B_1 = digitalRead (E1_OUT_B); // Read state of B
- 
-  if ((SIG_B_1 == SIG_A_1) && (lastSIG_B_1 != SIG_B_1)) {
-    pulseCount1--; // Counter-clockwise rotation
-    lastSIG_B_1 = SIG_B_1;
-    updateScreen(0, 1, 0, 0, 0, 0);
-  }
- 
-  else if ((SIG_B_1 != SIG_A_1) && (lastSIG_B_1 == SIG_B_1)) {
-    pulseCount1++; // Clockwise rotation
-    lastSIG_B_1 = SIG_B_1 > 0 ? 0 : 1; // Save last state of B
-    updateScreen(1, 0, 0, 0, 0, 0);
-  }
-  attachInterrupt (digitalPinToInterrupt (E1_OUT_A), A_CHANGE_1, CHANGE);
-}
-
-void A_CHANGE_2() { // Interrupt Service Routine (ISR)
-  detachInterrupt (0); // Important
-  SIG_A_2 = digitalRead (E2_OUT_A); // Read state of A
-  SIG_B_2 = digitalRead (E2_OUT_B); // Read state of B
- 
-  if ((SIG_B_2 == SIG_A_2) && (lastSIG_B_2 != SIG_B_2)) {
-    pulseCount2--; // Counter-clockwise rotation
-    lastSIG_B_2 = SIG_B_2;
-    updateScreen(0, 0, 0, 1, 0, 0);
-  }
- 
-  else if ((SIG_B_2 != SIG_A_2) && (lastSIG_B_2 == SIG_B_2)) {
-    pulseCount2++; // Clockwise rotation
-    lastSIG_B_2 = SIG_B_2 > 0 ? 0 : 1; // Save last state of B
-    updateScreen(0, 0, 1, 0, 0, 0);
-  }
-  attachInterrupt (digitalPinToInterrupt (E2_OUT_A), A_CHANGE_2, CHANGE);
-}
-
-void Push_1() {
-  detachInterrupt(0);
-  SIG_PUSH_1 = digitalRead(E1_PUSH);
-  SIG_PUSH_2 = 0;
-  for (int d = 0; d < 10; d++) {
-    if (digitalRead(E2_PUSH) == 1) {
-      SIG_PUSH_2 = digitalRead(E2_PUSH);
-      break;
-    }
-    delay(1);
-  }
-  
-  if (SIG_PUSH_1 == 1 & SIG_PUSH_2 == 1) {
-    updateScreen(0, 0, 0, 0, 1, 1);
-  }
-  else {
-    updateScreen(0, 0, 0, 0, 1, 0);
-  }
-  attachInterrupt (digitalPinToInterrupt(E1_PUSH), Push_1, CHANGE);
-}
-
-void Push_2() {
-  detachInterrupt(0);
-  SIG_PUSH_1 = 0;
-  SIG_PUSH_2 = digitalRead(E2_PUSH);
-  for (int d = 0; d < 10; d++) {
-    if (digitalRead(E1_PUSH) == 1) {
-      SIG_PUSH_1 = digitalRead(E1_PUSH);
-      break;
-    }
-    delay(1);
-  }
-
-  if (SIG_PUSH_1 == 1 && SIG_PUSH_2 == 1) {
-    updateScreen(0, 0, 0, 0, 1, 1);
-  } else {
-    updateScreen(0, 0, 0, 0, 0, 1);
-  }
-  attachInterrupt (digitalPinToInterrupt(E2_PUSH), Push_2, CHANGE);
-}
-
-void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2, bool push1, bool push2) {
-=======
   static int lastCounter = 0;
   static int lastCounter_2 = 0;
   // If count has changed print the new value to serial
@@ -342,16 +213,12 @@ void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2,
 }
 
 void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2, bool push, bool back) {
->>>>>>> Stashed changes
   switch(mode) {
     //Splash Screen
     case 0:
       if (push == 1 || back == 1) {
         gfx->fillScreen(WHITE);
         mode = 1;
-      } else {
-        gfx->drawEllipse(random(0, 255), random(0, 255), random(1, 10), random(1, 10), randomColor());
-        delay(5000);
       }
       break;
   //Main Menu
@@ -369,15 +236,10 @@ void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2,
           gfx->fillScreen(RED);
           gfx->setTextColor(WHITE);
           gfx->setCursor(gfx->width()/2 - 30, gfx->height()/2+5);
-<<<<<<< Updated upstream
-          gfx->print(addName);
-          if (push2 == 1 || push2 == 1) {
-=======
           gfx->print("Add");
           if (push) {
             gfx->fillScreen(RED);
             gfx->setTextColor(WHITE);
->>>>>>> Stashed changes
             resetAdd();
             mode = 2;
           }
@@ -386,15 +248,10 @@ void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2,
           gfx->fillScreen(BLUE);
           gfx->setTextColor(WHITE);
           gfx->setCursor(gfx->width()/2 - 50, gfx->height()/2+5);
-<<<<<<< Updated upstream
-          gfx->print(subName);
-          if (push2 == 1 || push2 == 1) {
-=======
           gfx->print("Subtract");
           if (push) {
             gfx->fillScreen(BLUE);
             gfx->setTextColor(WHITE);
->>>>>>> Stashed changes
             resetSub();
             mode = 3;
           }
@@ -403,15 +260,10 @@ void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2,
           gfx->fillScreen(GREEN);
           gfx->setTextColor(BLACK);
           gfx->setCursor(gfx->width()/2 - 50, gfx->height()/2+5);
-<<<<<<< Updated upstream
-          gfx->print(multiName);
-          if (push2 == 1 || push2 == 1) {
-=======
           gfx->print("Multiply");
           if (push) {
             gfx->fillScreen(GREEN);
             gfx->setTextColor(BLACK);
->>>>>>> Stashed changes
             resetMult();
             mode = 4;
           }
@@ -420,15 +272,10 @@ void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2,
           gfx->fillScreen(PURPLE);
           gfx->setTextColor(WHITE);
           gfx->setCursor(gfx->width()/2 - 50, gfx->height()/2+5);
-<<<<<<< Updated upstream
-          gfx->print(divName);
-          if (push2 == 1 || push2 == 1) {
-=======
           gfx->print("Division");
           if (push) {
             gfx->fillScreen(PURPLE);
             gfx->setTextColor(WHITE);
->>>>>>> Stashed changes
             resetDiv();
             mode = 5;
           }
@@ -437,15 +284,10 @@ void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2,
           gfx->fillScreen(BLACK);
           gfx->setTextColor(WHITE);
           gfx->setCursor(gfx->width()/2 - 50, gfx->height()/2+5);
-<<<<<<< Updated upstream
-          gfx->print(quizName);
-          if (push2 == 1 || push2 == 1) {
-=======
           gfx->print("Quiz");
           if (push) {
             gfx->fillScreen(BLACK);
             gfx->setTextColor(WHITE);
->>>>>>> Stashed changes
             resetQuiz();
             mode = 6;
           }
@@ -465,23 +307,8 @@ void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2,
       
       }
       break;
-    //Addiiton
+    //Additon
     case 2:
-<<<<<<< Updated upstream
-      
-      break;
-    //Subtraction
-    case 3:
-      break;
-    //Multiplication
-    case 4:
-      break;
-    //Division
-    case 5:
-      break;
-    //Quiz Mode
-    case 6:
-=======
       gfx->fillScreen(RED);
       gfx->setTextColor(WHITE);
       addMode(push, back);
@@ -522,7 +349,6 @@ void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2,
           divideMode(push, back);
           break;
       }
->>>>>>> Stashed changes
       break;
       case 7:
         gfx->fillScreen(RED);
@@ -551,11 +377,8 @@ void resetAdd() {
   sum = random(0, addUpperBound);
   addNum1 = random(0, addUpperBound);
   addNum2 = sum - addNum1;
-<<<<<<< Updated upstream
-=======
   counter = 0;
   counter_2 = 0;
->>>>>>> Stashed changes
 }
 
 void resetSub() {
@@ -565,11 +388,8 @@ void resetSub() {
   subNum1 = random(0, subUpperBound);
   subNum2 = random(0, subNum1);
   difference = subNum1 - subNum2;
-<<<<<<< Updated upstream
-=======
   counter = 0;
   counter_2 = 0;
->>>>>>> Stashed changes
 }
 
 void resetMult() {
@@ -579,11 +399,8 @@ void resetMult() {
   multNum1 = random(0, multUpperBound);
   multNum2 = random(0, multUpperBound);
   product = multNum1 * multNum2;
-<<<<<<< Updated upstream
-=======
   counter = 0;
   counter_2 = 0;
->>>>>>> Stashed changes
 }
 
 void resetDiv() {
@@ -593,11 +410,8 @@ void resetDiv() {
   divNum2 = random(0, divUpperBound);
   quotient = random(0, divUpperBound);
   divNum1 = divNum2 * quotient;
-<<<<<<< Updated upstream
-=======
   counter = 0;
   counter_2 = 0;
->>>>>>> Stashed changes
 }
 
 void resetQuiz() {
@@ -618,8 +432,6 @@ void resetQuiz() {
     case 3:
       resetDiv();
   }
-<<<<<<< Updated upstream
-=======
 }
 
 void addMode(int push, int back) {
@@ -888,5 +700,4 @@ void chooseGradeLevel(int push, int back) {
     mode = 1;
     updateScreen(0,0,0,0,0,0);
   }
->>>>>>> Stashed changes
 }
