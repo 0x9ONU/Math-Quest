@@ -2,20 +2,24 @@
 #include <Arduino.h>
 
 //Parameters for Screen
-#define TFT_CS 33
-#define TFT_DC 26
-#define TFT_RST 25
-#define TFT_SCK 14
-#define TFT_MOSI 27
-#define TFT_MISO -1  // no data coming back
-#define TFT_LED_MOSFET 12
-#define E1_OUT_A 34
-#define E1_OUT_B 35
+#define TFT_CS 5
+#define TFT_DC 27
+#define TFT_RST 33
+#define TFT_SCK 18
+#define TFT_MOSI 23
+#define TFT_MISO 19
+#define TFT_LED 22
+#define E1_OUT_A 26
+#define E1_OUT_B 25
 #define E1_PUSH 32
-#define E2_OUT_A 22
-#define E2_OUT_B 21
-#define E2_PUSH 23
+#define E2_OUT_A 12
+#define E2_OUT_B 14
+#define E2_PUSH 21
 #define MENU_BUTTON 13
+#define CS_SD 15
+#define MOST_SD 5
+#define MISO_SD 2
+#define CLK_SD 35
 
 
 /* More dev device declaration: https://github.com/moononournation/Arduino_GFX/wiki/Dev-Device-Declaration */
@@ -31,26 +35,34 @@ Arduino_DataBus *bus = new Arduino_ESP32SPI(TFT_DC, TFT_CS, TFT_SCK, TFT_MOSI, T
 Arduino_GFX *gfx = new Arduino_ILI9341(bus, TFT_RST, 1 /* rotation */, false /* IPS */);
 //Arduino_GC9A01 *gfx = new Arduino_GC9A01(bus, TFT_RST, 0 /* rotation */, true /* IPS */);
 
-
 #endif /* !defined(DISPLAY_DEV_KIT) */
 /*******************************************************************************
  * End of Arduino_GFX setting
  ******************************************************************************/
 
 //Rotary Encoder Settings
-int pulseCount1 = 0; // Rotation step count
-int SIG_A_1 = 0; // Pin A output
-int SIG_B_1 = 0; // Pin B output
-int lastSIG_A_1 = 0; // Last state of SIG_A
-int lastSIG_B_1 = 0; // Last state of SIG_B
-int SIG_PUSH_1 = 0; //Push
+unsigned long _lastIncReadTime = micros();
+unsigned long _lastDecReadTime = micros();
+int _pauseLength = 25000;
+int _fastIncrement = 10;
 
-int pulseCount2 = 0;
-int SIG_A_2 = 0; // Pin A output
-int SIG_B_2 = 0; // Pin B output
-int lastSIG_A_2 = 0; // Last state of SIG_A
-int lastSIG_B_2 = 0; // Last state of SIG_B
-int SIG_PUSH_2 = 0; //Push
+
+char gradeLevelName[18] = {'C', 'h', 'o', 'o', 's', 'e', 0x20, 'G', 'r', 'a', 'd', 'e', 0x20, 'L', 'e', 'v', 'e', 'l'};
+//bounds depending on grade level
+int addUpperBound = 99;
+int divUpperBound = 15;
+int subUpperBound = 99;
+int multUpperBound = 15;
+
+int counter = 0;
+int counter_2 = 0;
+
+bool push = 0;
+bool lastPush = false;
+
+void read_encoder();
+void read_encoder_2();
+void read_push();
 
 //Mode Settings
 short mode = 0;
@@ -84,24 +96,56 @@ short quizMode = 0;
 
 short currentScore = 0;
 
+<<<<<<< Updated upstream
+=======
+bool lastMenu = 0;
+
+//Cursor Variable
+short x = 0;
+short y = 0;
+
+
+>>>>>>> Stashed changes
 //Funciton Defintiions
 void A_CHANGE_1(); 
 void A_CHANGE_2();
 void Push_1();
 void Push_2();
-void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2, bool push1, bool push2);
+void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2, bool push, bool back);
 uint16_t randomColor();
 void squareTransition(uint16_t color);
+<<<<<<< Updated upstream
+=======
+void chooseGradeLevel(int push, int back);
+
+//Reset Numbers
+>>>>>>> Stashed changes
 void resetAdd();
 void resetSub();
 void resetMult();
 void resetDiv();
 void resetQuiz();
 
+<<<<<<< Updated upstream
 void setup() {
     //Setup Screen
     gfx->begin();
     gfx->fillScreen(WHITE);
+=======
+//Different Functions
+void addMode(int push, int back);
+void subtractMode(int push, int back);
+void multiplyMode(int push, int back);
+void divideMode(int push, int pubacksh2);
+
+void setup() {
+pinMode(TFT_LED, OUTPUT);
+digitalWrite(TFT_LED, HIGH);
+//Setup Screen
+gfx->begin();
+gfx->fillScreen(WHITE);
+Serial.begin(9600);
+>>>>>>> Stashed changes
 
 #ifdef TFT_BL
     pinMode(TFT_BL, OUTPUT);
@@ -114,11 +158,16 @@ void setup() {
     for (int i = 0; i < 10; i++) {
       gfx->setTextColor(randomColor());
       gfx->print(Title[i]);
+<<<<<<< Updated upstream
       delay(10);
+=======
+      delay(100);
+>>>>>>> Stashed changes
     }
 
     delay(1000);
 
+<<<<<<< Updated upstream
     gfx->fillRect(gfx->width()/2 -20, gfx->height()/2 - 6, 40, 20, WHITE);
     gfx->setCursor(gfx->width()/2-20, gfx->height()/2);
     gfx->print("Math Quest");
@@ -143,10 +192,33 @@ void setup() {
     attachInterrupt (digitalPinToInterrupt(E2_PUSH), Push_2, CHANGE);
 
     updateScreen(0, 0, 0, 0, 0, 0);
+=======
+gfx->fillScreen(WHITE);
+gfx->setCursor(20, gfx->height()/2-5);
+gfx->print("Math Quest");
+gfx->setCursor(20, gfx->height()/2+50);
+gfx->setTextSize(2, 2);
+delay(2000);
+updateScreen(0, 0, 0, 0, 1, 0);
+
+// Set encoder pins and attach interrupts
+pinMode(E1_OUT_A, INPUT_PULLUP);
+pinMode(E1_OUT_B, INPUT_PULLUP);
+pinMode(E2_OUT_A, INPUT_PULLUP);
+pinMode(E2_OUT_B, INPUT_PULLUP);
+pinMode(E1_PUSH, INPUT_PULLUP);
+pinMode(E2_PUSH, INPUT_PULLUP);
+pinMode(MENU_BUTTON, INPUT_PULLUP);
+attachInterrupt(digitalPinToInterrupt(E1_OUT_A), read_encoder, CHANGE);
+attachInterrupt(digitalPinToInterrupt(E1_OUT_B), read_encoder, CHANGE);
+attachInterrupt(digitalPinToInterrupt(E2_OUT_A), read_encoder_2, CHANGE);
+attachInterrupt(digitalPinToInterrupt(E2_OUT_B), read_encoder_2, CHANGE);
+>>>>>>> Stashed changes
 }
 
 void loop()
 {
+<<<<<<< Updated upstream
   updateScreen(0, 0, 0, 0, 0, 0);
 }
 
@@ -230,10 +302,51 @@ void Push_2() {
 }
 
 void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2, bool push1, bool push2) {
+=======
+  static int lastCounter = 0;
+  static int lastCounter_2 = 0;
+  // If count has changed print the new value to serial
+  if(counter != lastCounter){
+    if (counter < 0) counter = 0;
+    if (counter > 99) counter = 99;
+    if (counter < lastCounter) updateScreen(1, 0, 0, 0, 0, 0);
+    if (counter > lastCounter) updateScreen(0, 1, 0, 0, 0, 0);
+    lastCounter = counter;
+  }
+
+  if(counter_2 != lastCounter_2){
+    if (counter_2 < 0) counter_2 = 0;
+    if (counter_2 > 99) counter_2 = 99;
+    if (counter_2 < lastCounter_2) updateScreen(0, 0, 1, 0, 0, 0);
+    if (counter_2 > lastCounter_2) updateScreen(0, 0, 0, 1, 0, 0);
+    lastCounter_2 = counter_2;
+  }
+
+  bool push = !digitalRead(E1_PUSH) | !digitalRead(E2_PUSH);
+  bool menu_button = !digitalRead(MENU_BUTTON);
+  Serial.print(push);
+  Serial.print("     ");
+  Serial.println(menu_button);
+
+  if (push && !lastPush) {
+    updateScreen(0, 0, 0, 0, 1, 0);
+    lastPush = true;
+  }
+  else if (!push && lastPush) {
+    lastPush = false;
+  }
+
+  if (menu_button) {
+    updateScreen(0, 0, 0, 0, 0, 1);
+  }
+}
+
+void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2, bool push, bool back) {
+>>>>>>> Stashed changes
   switch(mode) {
     //Splash Screen
     case 0:
-      if (push1 == 1 || push2 == 1) {
+      if (push == 1 || back == 1) {
         gfx->fillScreen(WHITE);
         mode = 1;
       } else {
@@ -243,13 +356,28 @@ void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2,
       break;
   //Main Menu
    case 1:
+    if (forward1 || forward2) {
+      menu1++;
+      if (menu1 > 6) menu1 = 0;
+    }
+    else if(backwards1 || backward2) {
+      menu1--;
+      if (menu1 < 0) menu1 = 6;
+    } 
       switch(menu1) {
         case 0:
           gfx->fillScreen(RED);
           gfx->setTextColor(WHITE);
           gfx->setCursor(gfx->width()/2 - 30, gfx->height()/2+5);
+<<<<<<< Updated upstream
           gfx->print(addName);
           if (push2 == 1 || push2 == 1) {
+=======
+          gfx->print("Add");
+          if (push) {
+            gfx->fillScreen(RED);
+            gfx->setTextColor(WHITE);
+>>>>>>> Stashed changes
             resetAdd();
             mode = 2;
           }
@@ -258,8 +386,15 @@ void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2,
           gfx->fillScreen(BLUE);
           gfx->setTextColor(WHITE);
           gfx->setCursor(gfx->width()/2 - 50, gfx->height()/2+5);
+<<<<<<< Updated upstream
           gfx->print(subName);
           if (push2 == 1 || push2 == 1) {
+=======
+          gfx->print("Subtract");
+          if (push) {
+            gfx->fillScreen(BLUE);
+            gfx->setTextColor(WHITE);
+>>>>>>> Stashed changes
             resetSub();
             mode = 3;
           }
@@ -268,8 +403,15 @@ void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2,
           gfx->fillScreen(GREEN);
           gfx->setTextColor(BLACK);
           gfx->setCursor(gfx->width()/2 - 50, gfx->height()/2+5);
+<<<<<<< Updated upstream
           gfx->print(multiName);
           if (push2 == 1 || push2 == 1) {
+=======
+          gfx->print("Multiply");
+          if (push) {
+            gfx->fillScreen(GREEN);
+            gfx->setTextColor(BLACK);
+>>>>>>> Stashed changes
             resetMult();
             mode = 4;
           }
@@ -278,8 +420,15 @@ void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2,
           gfx->fillScreen(PURPLE);
           gfx->setTextColor(WHITE);
           gfx->setCursor(gfx->width()/2 - 50, gfx->height()/2+5);
+<<<<<<< Updated upstream
           gfx->print(divName);
           if (push2 == 1 || push2 == 1) {
+=======
+          gfx->print("Division");
+          if (push) {
+            gfx->fillScreen(PURPLE);
+            gfx->setTextColor(WHITE);
+>>>>>>> Stashed changes
             resetDiv();
             mode = 5;
           }
@@ -288,16 +437,37 @@ void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2,
           gfx->fillScreen(BLACK);
           gfx->setTextColor(WHITE);
           gfx->setCursor(gfx->width()/2 - 50, gfx->height()/2+5);
+<<<<<<< Updated upstream
           gfx->print(quizName);
           if (push2 == 1 || push2 == 1) {
+=======
+          gfx->print("Quiz");
+          if (push) {
+            gfx->fillScreen(BLACK);
+            gfx->setTextColor(WHITE);
+>>>>>>> Stashed changes
             resetQuiz();
             mode = 6;
           }
           break;
+          case 5:
+          gfx->fillScreen(RED);
+          gfx->setTextColor(WHITE);
+          gfx->setCursor(gfx->width()/2 - 50, gfx->height()/2+5);
+          gfx->print(gradeLevelName);
+          if (push) {
+            gfx->fillScreen(RED);
+            gfx->setTextColor(WHITE);
+            
+            mode = 7;
+          }
+          break;
+      
       }
       break;
     //Addiiton
     case 2:
+<<<<<<< Updated upstream
       
       break;
     //Subtraction
@@ -311,7 +481,55 @@ void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2,
       break;
     //Quiz Mode
     case 6:
+=======
+      gfx->fillScreen(RED);
+      gfx->setTextColor(WHITE);
+      addMode(push, back);
       break;
+    //Subtraction
+    case 3:
+      gfx->fillScreen(BLUE);
+      gfx->setTextColor(WHITE);
+      subtractMode(push, back);
+      break;
+    //Multiplication
+    case 4:
+      gfx->fillScreen(GREEN);
+      gfx->setTextColor(BLACK);
+      multiplyMode(push, back);
+      break;
+    //Division
+    case 5:
+      gfx->fillScreen(PURPLE);
+      gfx->setTextColor(WHITE);
+      divideMode(push, back);
+      break;
+    //Quiz Mode
+    case 6:
+      gfx->fillScreen(BLACK);
+      gfx->setTextColor(WHITE);
+      switch(quizMode) {
+        case 0:
+          addMode(push, back);
+          break;
+        case 1:
+          subtractMode(push, back);
+          break;
+        case 2:
+          multiplyMode(push, back);
+          break;
+        case 3:
+          divideMode(push, back);
+          break;
+      }
+>>>>>>> Stashed changes
+      break;
+      case 7:
+        gfx->fillScreen(RED);
+        gfx->setTextColor(WHITE);
+        chooseGradeLevel(push, back);
+      break;
+  
   }
 }
 
@@ -330,36 +548,56 @@ void resetAdd() {
   if (mode != 2) {
     currentScore = 0;
   }
-  sum = random(0, 99);
-  addNum1 = random(0, 99);
+  sum = random(0, addUpperBound);
+  addNum1 = random(0, addUpperBound);
   addNum2 = sum - addNum1;
+<<<<<<< Updated upstream
+=======
+  counter = 0;
+  counter_2 = 0;
+>>>>>>> Stashed changes
 }
 
 void resetSub() {
   if (mode != 3) {
     currentScore = 0;
   }
-  subNum1 = random(0, 99);
-  subNum2 = random(0, addNum1);
+  subNum1 = random(0, subUpperBound);
+  subNum2 = random(0, subNum1);
   difference = subNum1 - subNum2;
+<<<<<<< Updated upstream
+=======
+  counter = 0;
+  counter_2 = 0;
+>>>>>>> Stashed changes
 }
 
 void resetMult() {
   if (mode != 4) {
     currentScore = 0;
   }
-  multNum1 = random(0, 9);
-  multNum2 = random(0, 9);
+  multNum1 = random(0, multUpperBound);
+  multNum2 = random(0, multUpperBound);
   product = multNum1 * multNum2;
+<<<<<<< Updated upstream
+=======
+  counter = 0;
+  counter_2 = 0;
+>>>>>>> Stashed changes
 }
 
 void resetDiv() {
   if (mode != 5) {
     currentScore = 0;
   }
-  divNum2 = random(0, 9);
-  quotient = random(0, 9);
+  divNum2 = random(0, divUpperBound);
+  quotient = random(0, divUpperBound);
   divNum1 = divNum2 * quotient;
+<<<<<<< Updated upstream
+=======
+  counter = 0;
+  counter_2 = 0;
+>>>>>>> Stashed changes
 }
 
 void resetQuiz() {
@@ -380,4 +618,275 @@ void resetQuiz() {
     case 3:
       resetDiv();
   }
+<<<<<<< Updated upstream
+=======
+}
+
+void addMode(int push, int back) {
+  gfx->setTextSize(3,3);
+  gfx->setCursor(0, 50);
+  gfx->print("Score: ");
+  gfx->print(currentScore);
+  gfx->setCursor(0, gfx->height()/2);
+  gfx->print(addNum1); gfx->print(" + "); gfx->print(addNum2); gfx->print(" = ");
+  if (counter != 0) gfx->print(counter % 10);
+  else gfx->print(" ");
+  gfx->print(counter_2 % 10);
+  if(push) {
+    short calculatedSum = (counter%10)*10 + counter_2%10;
+    if (sum == calculatedSum) {
+      gfx->setCursor(10, 10);
+      gfx->setTextSize(3, 3);
+      gfx->print("CORRECT!");
+      gfx->setTextSize(5,5);
+      currentScore++;
+      if (mode == 6) resetQuiz();
+      else resetAdd();
+      delay(1000);
+      updateScreen(0,0,0,0,0,0);
+    } else {
+      gfx->setCursor(10, 10);
+      gfx->setTextSize(3, 3);
+      gfx->print("WRONG!");
+      gfx->setTextSize(5,5);
+      delay(1000);
+      updateScreen(0,0,0,0,0,0);
+    }
+  }
+  if (back) {
+    mode = 1;
+    currentScore = 0;
+    updateScreen(0,0,0,0,0,0);
+  }
+}
+void subtractMode(int push, int back) {
+  gfx->setTextSize(3,3);
+  gfx->setCursor(0, 50);
+  gfx->print("Score: ");
+  gfx->print(currentScore);
+  gfx->setCursor(0, gfx->height()/2);
+  gfx->print(subNum1); gfx->print(" - "); gfx->print(subNum2); gfx->print(" = ");
+  if (counter != 0) gfx->print(counter % 10);
+  else gfx->print(" ");
+  gfx->print(counter_2 % 10);
+  if(push) {
+    short calculatedDifference = (counter%10)*10 + counter_2%10;
+    if (difference == calculatedDifference) {
+      gfx->setCursor(10, 10);
+      gfx->setTextSize(3, 3);
+      gfx->print("CORRECT!");
+      gfx->setTextSize(5,5);
+      currentScore++;
+      if (mode == 6) resetQuiz();
+      else resetSub();
+      delay(1000);
+      updateScreen(0,0,0,0,0,0);
+    } else {
+      gfx->setCursor(10, 10);
+      gfx->setTextSize(3, 3);
+      gfx->print("WRONG!");
+      gfx->setTextSize(5,5);
+      delay(1000);
+      updateScreen(0,0,0,0,0,0);
+    }
+  }
+  if (back) {
+    mode = 1;
+    currentScore = 0;
+    updateScreen(0,0,0,0,0,0);
+  }
+}
+void multiplyMode(int push, int back) {
+  gfx->setTextSize(3,3);
+  gfx->setCursor(0, 50);
+  gfx->print("Score: ");
+  gfx->print(currentScore);
+  gfx->setCursor(0, gfx->height()/2);
+  gfx->print(multNum1); gfx->print(" * "); gfx->print(multNum2); gfx->print(" = ");
+  if (counter != 0) gfx->print(counter % 10);
+  else gfx->print(" ");
+  gfx->print(counter_2 % 10);
+  if(push) {
+    short calculatedProduct = (counter%10)*10 + counter_2%10;
+    if (product == calculatedProduct) {
+      gfx->setCursor(10, 10);
+      gfx->setTextSize(3, 3);
+      gfx->print("CORRECT!");
+      gfx->setTextSize(5,5);
+      currentScore++;
+      if (mode == 6) resetQuiz();
+      else resetMult();
+      delay(1000);
+      updateScreen(0,0,0,0,0,0);
+    } else {
+      gfx->setCursor(10, 10);
+      gfx->setTextSize(3, 3);
+      gfx->print("WRONG!");
+      gfx->setTextSize(5,5);
+      delay(1000);
+      updateScreen(0,0,0,0,0,0);
+    }
+  }
+  if (back) {
+    mode = 1;
+    currentScore = 0;
+    updateScreen(0,0,0,0,0,0);
+  }
+}
+void divideMode(int push, int back) {
+  gfx->setTextSize(3,3);
+  gfx->setCursor(0, 50);
+  gfx->print("Score: ");
+  gfx->print(currentScore);
+  gfx->setCursor(0, gfx->height()/2);
+  gfx->print(divNum1); gfx->print(" ÷ "); gfx->print(divNum2); gfx->print(" = ");
+  if (counter != 0) gfx->print(counter % 10);
+  else gfx->print(" ");
+  gfx->print(counter_2 % 10);
+  if(push) {
+    short calculatedQuotient = (counter%10)*10 + counter_2%10;
+    if (quotient == calculatedQuotient) {
+      gfx->setCursor(10, 10);
+      gfx->setTextSize(3, 3);
+      gfx->print("CORRECT!");
+      gfx->setTextSize(5,5);
+      currentScore++;
+      if (mode == 6) resetQuiz();
+      else resetDiv();
+      delay(1000);
+      updateScreen(0,0,0,0,0,0);
+    } else {
+      gfx->setCursor(10, 10);
+      gfx->setTextSize(3, 3);
+      gfx->print("WRONG!");
+      gfx->setTextSize(5,5);
+      delay(1000);
+      updateScreen(0,0,0,0,0,0);
+    }
+  }
+  if (back) {
+    mode = 1;
+    currentScore = 0;
+    updateScreen(0,0,0,0,0,0);
+  }
+}
+
+void read_encoder() {
+  // Encoder interrupt routine for both pins. Updates counter
+  // if they are valid and have rotated a full indent
+ 
+  static uint8_t old_AB = 3;  // Lookup table index
+  static int8_t encval = 0;   // Encoder value  
+  static const int8_t enc_states[]  = {0,-1,1,0,1,0,0,-1,-1,0,0,1,0,1,-1,0}; // Lookup table
+
+  old_AB <<=2;  // Remember previous state
+
+  if (digitalRead(E1_OUT_A)) old_AB |= 0x02; // Add current state of pin A
+  if (digitalRead(E1_OUT_B)) old_AB |= 0x01; // Add current state of pin B
+ 
+  encval += enc_states[( old_AB & 0x0f )];
+
+  // Update counter if encoder has rotated a full indent, that is at least 4 steps
+  if( encval > 3 ) {        // Four steps forward
+    int changevalue = 1;
+    if((micros() - _lastIncReadTime) < _pauseLength) {
+      changevalue = _fastIncrement * changevalue;
+    }
+    _lastIncReadTime = micros();
+    counter = counter + changevalue;              // Update counter
+    encval = 0;
+  }
+  else if( encval < -3 ) {        // Four steps backward
+    int changevalue = -1;
+    if((micros() - _lastDecReadTime) < _pauseLength) {
+      changevalue = _fastIncrement * changevalue;
+    }
+    _lastDecReadTime = micros();
+    counter = counter + changevalue;              // Update counter
+    encval = 0;
+  }
+}
+
+void read_encoder_2() {
+  // Encoder interrupt routine for both pins. Updates counter
+  // if they are valid and have rotated a full indent
+ 
+  static uint8_t old_AB = 3;  // Lookup table index
+  static int8_t encval = 0;   // Encoder value  
+  static const int8_t enc_states[]  = {0,-1,1,0,1,0,0,-1,-1,0,0,1,0,1,-1,0}; // Lookup table
+
+  old_AB <<=2;  // Remember previous state
+
+  if (digitalRead(E2_OUT_A)) old_AB |= 0x02; // Add current state of pin A
+  if (digitalRead(E2_OUT_B)) old_AB |= 0x01; // Add current state of pin B
+ 
+  encval += enc_states[( old_AB & 0x0f )];
+
+  // Update counter if encoder has rotated a full indent, that is at least 4 steps
+  if( encval > 3 ) {        // Four steps forward
+    int changevalue = 1;
+    if((micros() - _lastIncReadTime) < _pauseLength) {
+      changevalue = _fastIncrement * changevalue;
+    }
+    _lastIncReadTime = micros();
+    counter_2 = counter_2 + changevalue;              // Update counter
+    encval = 0;
+  }
+  else if( encval < -3 ) {        // Four steps backward
+    int changevalue = -1;
+    if((micros() - _lastDecReadTime) < _pauseLength) {
+      changevalue = _fastIncrement * changevalue;
+    }
+    _lastDecReadTime = micros();
+    counter_2 = counter_2 + changevalue;              // Update counter
+    encval = 0;
+  }
+
+}
+void chooseGradeLevel(int push, int back) {
+  gfx->setCursor(0, gfx->height()/2);
+  gfx->print("Input grade Level 1-5: ");
+  if (counter != 0) gfx->print(counter % 5 + 1);
+  else gfx->print(" ");
+  if(push) {
+    short gradeLevel = counter % 5 + 1;
+    switch(gradeLevel) {
+      case 1: 
+      //first grade limits
+        addUpperBound = 20;
+        subUpperBound = 20;
+        break;
+      case 2: 
+        addUpperBound = 40;
+        subUpperBound = 40;
+        break;
+      case 3: 
+        addUpperBound = 60;
+        subUpperBound = 60;
+        multUpperBound = 12;
+        divUpperBound = 12;
+        break;
+      case 4: 
+        addUpperBound = 80;
+        subUpperBound = 80;
+        multUpperBound = 13;
+        divUpperBound = 13;
+        break; 
+      case 5:
+        addUpperBound = 99;
+        subUpperBound = 99;
+        multUpperBound = 15;
+        divUpperBound = 15;
+        break;
+    }
+
+    mode = 1;
+    updateScreen(0,0,0,0,0,0);
+  
+  }
+  else if(back){
+    mode = 1;
+    updateScreen(0,0,0,0,0,0);
+  }
+>>>>>>> Stashed changes
 }
