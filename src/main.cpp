@@ -113,6 +113,7 @@ uint16_t randomColor();
 void squareTransition(uint16_t color);
 void chooseGradeLevel(int push, int back);
 
+
 //Reset Numbers
 void resetAdd();
 void resetSub();
@@ -349,6 +350,7 @@ void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2,
           divideMode(push, back);
           break;
       }
+
       break;
       case 7:
         gfx->fillScreen(RED);
@@ -653,7 +655,6 @@ void read_encoder_2() {
     counter_2 = counter_2 + changevalue;              // Update counter
     encval = 0;
   }
-
 }
 void chooseGradeLevel(int push, int back) {
   gfx->setCursor(0, gfx->height()/2);
@@ -701,3 +702,5 @@ void chooseGradeLevel(int push, int back) {
     updateScreen(0,0,0,0,0,0);
   }
 }
+}
+
