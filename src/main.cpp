@@ -46,6 +46,14 @@ unsigned long _lastDecReadTime = micros();
 int _pauseLength = 25000;
 int _fastIncrement = 10;
 
+
+char gradeLevelName[18] = {'C', 'h', 'o', 'o', 's', 'e', 0x20, 'G', 'r', 'a', 'd', 'e', 0x20, 'L', 'e', 'v', 'e', 'l'};
+//bounds depending on grade level
+int addUpperBound = 99;
+int divUpperBound = 15;
+int subUpperBound = 99;
+int multUpperBound = 15;
+
 int counter = 0;
 int counter_2 = 0;
 
@@ -103,6 +111,8 @@ void Push_2();
 void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2, bool push, bool back);
 uint16_t randomColor();
 void squareTransition(uint16_t color);
+void chooseGradeLevel(int push, int back);
+
 
 //Reset Numbers
 void resetAdd();
@@ -283,6 +293,19 @@ void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2,
             mode = 6;
           }
           break;
+          case 5:
+          gfx->fillScreen(RED);
+          gfx->setTextColor(WHITE);
+          gfx->setCursor(gfx->width()/2 - 50, gfx->height()/2+5);
+          gfx->print(gradeLevelName);
+          if (push) {
+            gfx->fillScreen(RED);
+            gfx->setTextColor(WHITE);
+            
+            mode = 7;
+          }
+          break;
+      
       }
       break;
     //Additon
@@ -327,7 +350,14 @@ void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2,
           divideMode(push, back);
           break;
       }
+
       break;
+      case 7:
+        gfx->fillScreen(RED);
+        gfx->setTextColor(WHITE);
+        chooseGradeLevel(push, back);
+      break;
+  
   }
 }
 
@@ -346,8 +376,8 @@ void resetAdd() {
   if (mode != 2) {
     currentScore = 0;
   }
-  sum = random(0, 99);
-  addNum1 = random(0, 99);
+  sum = random(0, addUpperBound);
+  addNum1 = random(0, addUpperBound);
   addNum2 = sum - addNum1;
   counter = 0;
   counter_2 = 0;
@@ -357,8 +387,8 @@ void resetSub() {
   if (mode != 3) {
     currentScore = 0;
   }
-  subNum1 = random(0, 99);
-  subNum2 = random(0, addNum1);
+  subNum1 = random(0, subUpperBound);
+  subNum2 = random(0, subNum1);
   difference = subNum1 - subNum2;
   counter = 0;
   counter_2 = 0;
@@ -368,8 +398,8 @@ void resetMult() {
   if (mode != 4) {
     currentScore = 0;
   }
-  multNum1 = random(0, 9);
-  multNum2 = random(0, 9);
+  multNum1 = random(0, multUpperBound);
+  multNum2 = random(0, multUpperBound);
   product = multNum1 * multNum2;
   counter = 0;
   counter_2 = 0;
@@ -379,8 +409,8 @@ void resetDiv() {
   if (mode != 5) {
     currentScore = 0;
   }
-  divNum2 = random(0, 9);
-  quotient = random(0, 9);
+  divNum2 = random(0, divUpperBound);
+  quotient = random(0, divUpperBound);
   divNum1 = divNum2 * quotient;
   counter = 0;
   counter_2 = 0;
@@ -625,5 +655,52 @@ void read_encoder_2() {
     counter_2 = counter_2 + changevalue;              // Update counter
     encval = 0;
   }
+}
+void chooseGradeLevel(int push, int back) {
+  gfx->setCursor(0, gfx->height()/2);
+  gfx->print("Input grade Level 1-5: ");
+  if (counter != 0) gfx->print(counter % 5 + 1);
+  else gfx->print(" ");
+  if(push) {
+    short gradeLevel = counter % 5 + 1;
+    switch(gradeLevel) {
+      case 1: 
+      //first grade limits
+        addUpperBound = 20;
+        subUpperBound = 20;
+        break;
+      case 2: 
+        addUpperBound = 40;
+        subUpperBound = 40;
+        break;
+      case 3: 
+        addUpperBound = 60;
+        subUpperBound = 60;
+        multUpperBound = 12;
+        divUpperBound = 12;
+        break;
+      case 4: 
+        addUpperBound = 80;
+        subUpperBound = 80;
+        multUpperBound = 13;
+        divUpperBound = 13;
+        break; 
+      case 5:
+        addUpperBound = 99;
+        subUpperBound = 99;
+        multUpperBound = 15;
+        divUpperBound = 15;
+        break;
+    }
+
+    mode = 1;
+    updateScreen(0,0,0,0,0,0);
+  
+  }
+  else if(back){
+    mode = 1;
+    updateScreen(0,0,0,0,0,0);
+  }
+}
 }
 
