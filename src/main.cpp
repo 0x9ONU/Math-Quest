@@ -52,7 +52,7 @@ char gradeLevelName[18] = {'C', 'h', 'o', 'o', 's', 'e', 0x20, 'G', 'r', 'a', 'd
 int addUpperBound = 99;
 int divUpperBound = 15;
 int subUpperBound = 99;
-int multUpperBound = 15;
+int multUpperBound = 10;
 
 int counter = 0;
 int counter_2 = 0;
@@ -377,7 +377,7 @@ void resetAdd() {
     currentScore = 0;
   }
   sum = random(0, addUpperBound);
-  addNum1 = random(0, addUpperBound);
+  addNum1 = random(0, sum);
   addNum2 = sum - addNum1;
   counter = 0;
   counter_2 = 0;
@@ -420,6 +420,20 @@ void resetQuiz() {
   if (mode != 6) {
     currentScore = 0;
   }
+  if (currentScore == 1){
+    for (int i = 0; i < 100; i++) { // Draw 100 confetti pieces
+      int x = random(0, gfx->width());
+      int y = random(0, gfx->height()); 
+      int radius = random(2, 5);
+      uint16_t color = random(0xFFFF);
+      
+      gfx->fillCircle(x, y, radius, color);
+      delay(10); 
+    }
+    delay(1000);  // Hold for a second
+    gfx->fillScreen(BLACK); // Clear screen for the next "explosion"
+  
+}
   quizMode = random(0, 3);
   switch(quizMode) {
     case 0:
@@ -702,5 +716,5 @@ void chooseGradeLevel(int push, int back) {
     updateScreen(0,0,0,0,0,0);
   }
 }
-}
+
 
