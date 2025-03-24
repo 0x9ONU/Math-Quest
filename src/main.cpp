@@ -421,17 +421,7 @@ void resetQuiz() {
     currentScore = 0;
   }
   if (currentScore == 1){
-    for (int i = 0; i < 100; i++) { // Draw 100 confetti pieces
-      int x = random(0, gfx->width());
-      int y = random(0, gfx->height()); 
-      int radius = random(2, 5);
-      uint16_t color = random(0xFFFF);
-      
-      gfx->fillCircle(x, y, radius, color);
-      delay(10); 
-    }
-    delay(1000);  // Hold for a second
-    gfx->fillScreen(BLACK); // Clear screen for the next "explosion"
+    confetti();
   
 }
   quizMode = random(0, 3);
@@ -466,6 +456,7 @@ void addMode(int push, int back) {
       gfx->setCursor(10, 10);
       gfx->setTextSize(3, 3);
       gfx->print("CORRECT!");
+      confetti();
       gfx->setTextSize(5,5);
       currentScore++;
       if (mode == 6) resetQuiz();
@@ -503,6 +494,7 @@ void subtractMode(int push, int back) {
       gfx->setCursor(10, 10);
       gfx->setTextSize(3, 3);
       gfx->print("CORRECT!");
+      confetti();
       gfx->setTextSize(5,5);
       currentScore++;
       if (mode == 6) resetQuiz();
@@ -540,6 +532,7 @@ void multiplyMode(int push, int back) {
       gfx->setCursor(10, 10);
       gfx->setTextSize(3, 3);
       gfx->print("CORRECT!");
+      confetti();
       gfx->setTextSize(5,5);
       currentScore++;
       if (mode == 6) resetQuiz();
@@ -577,6 +570,7 @@ void divideMode(int push, int back) {
       gfx->setCursor(10, 10);
       gfx->setTextSize(3, 3);
       gfx->print("CORRECT!");
+      confetti();
       gfx->setTextSize(5,5);
       currentScore++;
       if (mode == 6) resetQuiz();
@@ -715,6 +709,19 @@ void chooseGradeLevel(int push, int back) {
     mode = 1;
     updateScreen(0,0,0,0,0,0);
   }
+}
+void confetti(){
+  for (int i = 0; i < 100; i++) { // Draw 100 confetti pieces
+    int x = random(0, gfx->width());
+    int y = random(0, gfx->height()); 
+    int radius = random(2, 5);
+    uint16_t color = random(0xFFFF);
+    
+    gfx->fillCircle(x, y, radius, color);
+    delay(10); 
+  }
+  delay(1000);  // Hold for a second
+  gfx->fillScreen(BLACK); // Clear screen for the next "explosion"
 }
 
 
