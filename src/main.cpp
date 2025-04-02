@@ -49,6 +49,7 @@ int _fastIncrement = 10;
 
 char gradeLevelName[18] = {'C', 'h', 'o', 'o', 's', 'e', 0x20, 'G', 'r', 'a', 'd', 'e', 0x20, 'L', 'e', 'v', 'e', 'l'};
 //bounds depending on grade level
+//defualt upper bounds (5th Grade)
 int addUpperBound = 99;
 int divUpperBound = 15;
 int subUpperBound = 99;
@@ -60,6 +61,7 @@ int counter_2 = 0;
 bool push = 0;
 bool lastPush = false;
 
+//encoder controls 
 void read_encoder();
 void read_encoder_2();
 void read_push();
@@ -68,7 +70,7 @@ void read_push();
 short mode = 0;
 //0 is Splash Screen, 1 is Game Selection, 2 is Addition Mode, 3 is Subtraction Mode, 4 is Multiplicaiotn, 5 is Division, 6 is Quiz Mode
 
-//Text Game Selection
+//Text Game Selection and initial values 
 char addName[3] = {'A', 'd', 'd'};
 short sum = 0;
 short addNum1 = 0;
@@ -121,7 +123,7 @@ void resetMult();
 void resetDiv();
 void resetQuiz();
 
-//Different Functions
+//Mode function defintions
 void addMode(int push, int back);
 void subtractMode(int push, int back);
 void multiplyMode(int push, int back);
@@ -130,6 +132,7 @@ void divideMode(int push, int pubacksh2);
 void setup() {
 pinMode(TFT_LED, OUTPUT);
 digitalWrite(TFT_LED, HIGH);
+
 //Setup Screen
 gfx->begin();
 gfx->fillScreen(WHITE);
@@ -151,6 +154,7 @@ Serial.begin(9600);
 
     delay(1000);
 
+// Display opening screen menu
 gfx->fillScreen(WHITE);
 gfx->setCursor(20, gfx->height()/2-5);
 gfx->print("Math Quest");
