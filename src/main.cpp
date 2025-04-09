@@ -341,6 +341,7 @@ void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2,
       gfx->fillScreen(BLACK);
       gfx->setTextColor(WHITE);
       switch(quizMode) {
+        //switch between 
         case 0:
           addMode(push, back);
           break;
