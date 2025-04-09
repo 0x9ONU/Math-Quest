@@ -341,7 +341,7 @@ void updateScreen(bool forward1, bool backwards1, bool forward2, bool backward2,
       gfx->fillScreen(BLACK);
       gfx->setTextColor(WHITE);
       switch(quizMode) {
-        //switch between 
+        //switch between types of questions 
         case 0:
           addMode(push, back);
           break;
@@ -377,58 +377,77 @@ uint16_t randomColor() {
 void squareTransition(uint16_t color) {
   return; //may or may not be implemented
 }
+//reset functions 
 void resetAdd() {
+  //set current score 
   if (mode != 2) {
     currentScore = 0;
   }
+  //calcualte the total sum, then use as upper limit for the addends
   sum = random(0, addUpperBound);
   addNum1 = random(0, sum);
   addNum2 = sum - addNum1;
+  //reset encoders
   counter = 0;
   counter_2 = 0;
 }
 
 void resetSub() {
+  //set current score 
   if (mode != 3) {
     currentScore = 0;
   }
+  //determine the subtrahend and minuend 
   subNum1 = random(0, subUpperBound);
   subNum2 = random(0, subNum1);
+  //calculate the correct answer
   difference = subNum1 - subNum2;
+  //reset encoders
   counter = 0;
   counter_2 = 0;
 }
 
 void resetMult() {
+  //set current score 
   if (mode != 4) {
     currentScore = 0;
   }
+  //determine multipliers with grade level upper bound
   multNum1 = random(0, multUpperBound);
   multNum2 = random(0, multUpperBound);
+  //determine the correct answer
   product = multNum1 * multNum2;
+  //reset encoders
   counter = 0;
   counter_2 = 0;
 }
 
 void resetDiv() {
+  //set current score 
   if (mode != 5) {
     currentScore = 0;
   }
+  //determine the quotient and divisor from grade level upper bound 
   divNum2 = random(0, divUpperBound);
   quotient = random(0, divUpperBound);
+  //use known values to calculate the dividend 
   divNum1 = divNum2 * quotient;
+  //reset encoders 
   counter = 0;
   counter_2 = 0;
 }
 
 void resetQuiz() {
+  //set current score 
   if (mode != 6) {
     currentScore = 0;
   }
+  //confetti if question is correct 
   if (currentScore == 1){
     confetti();
   
 }
+//randomly switch between mode questions
   quizMode = random(0, 3);
   switch(quizMode) {
     case 0:
@@ -670,6 +689,7 @@ void read_encoder_2() {
   }
 }
 void chooseGradeLevel(int push, int back) {
+  //setting the bounds for each problem 
   gfx->setCursor(0, gfx->height()/2);
   gfx->print("Input grade Level 1-5: ");
   if (counter != 0) gfx->print(counter % 5 + 1);
@@ -716,7 +736,8 @@ void chooseGradeLevel(int push, int back) {
   }
 }
 void confetti(){
-  for (int i = 0; i < 100; i++) { // Draw 100 confetti pieces
+  //display randomized confetti then reset screen
+  for (int i = 0; i < 100; i++) { // draw 100 confetti pieces
     int x = random(0, gfx->width());
     int y = random(0, gfx->height()); 
     int radius = random(2, 5);
@@ -725,8 +746,8 @@ void confetti(){
     gfx->fillCircle(x, y, radius, color);
     delay(10); 
   }
-  delay(1000);  // Hold for a second
-  gfx->fillScreen(BLACK); // Clear screen for the next "explosion"
+  delay(1000);  //hold them for one second 
+  gfx->fillScreen(BLACK); //clear the screen for the next "explosion"
 }
 
 
